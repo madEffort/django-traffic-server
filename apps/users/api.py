@@ -1,4 +1,3 @@
-from django.contrib.auth.hashers import check_password
 from ninja_extra import api_controller, route
 from .models import User
 from .schemas import Error, UserSchema, UserIn, UserOut
