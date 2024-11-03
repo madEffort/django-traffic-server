@@ -4,6 +4,7 @@ from django.http import JsonResponse, HttpResponse
 from ninja_extra import api_controller, route
 from ninja_jwt.authentication import JWTAuth
 from ninja_jwt.tokens import RefreshToken
+from ninja.responses import Response
 
 from config import settings
 from .models import User
@@ -41,11 +42,9 @@ class UserController:
         access_token = str(refresh.access_token)
         refresh_token = str(refresh)
 
-        # 응답 데이터 구조 생성
         response_data = {"access": access_token, "refresh": refresh_token}
 
-        # 임시 HttpResponse 생성 후 쿠키 설정
-        response = HttpResponse()
+        response = JsonResponse(response_data, status=200)
         response.set_cookie(
             key=settings.NINJA_JWT["AUTH_COOKIE"],
             value=access_token,
@@ -67,9 +66,30 @@ class UserController:
         # CSRF 토큰 설정
         response["X-CSRFToken"] = csrf.get_token(request)
 
-        # 쿠키가 클라이언트에 저장될 수 있도록 temp_response 사용 후 response_data 반환
-        response.content = JsonResponse(response_data).content
         return response
+
+    @route.post("/logout", response={200: None, 400: Error}, auth=JWTAuth())
+    def logout_user_handler(self, request):
+        """유저 로그아웃"""
+
+        refresh_token = (
+            request.COOKIES.get(settings.NINJA_JWT["AUTH_COOKIE_REFRESH"])
+        ) or (request.headers.get("Authorization").split(" ")[1])
+
+        if not refresh_token:
+            return 400, {"detail": "Failed to logout"}
+
+        token = RefreshToken(refresh_token)
+        token.blacklist()
+
+        response = HttpResponse()
+        response.delete_cookie(settings.NINJA_JWT["AUTH_COOKIE"])
+        response.delete_cookie(settings.NINJA_JWT["AUTH_COOKIE_REFRESH"])
+        response.delete_cookie("X-CSRFToken")
+        response.delete_cookie("csrftoken")
+        response["X-CSRFToken"] = None
+
+        return 200, response
 
     @route.delete("/{user_id}", response={204: None, 404: Error}, auth=JWTAuth())
     def delete_user_handler(self, user_id):
