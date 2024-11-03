@@ -33,7 +33,8 @@ CORS_ALLOW_ALL_ORIGINS = True  # 개발 시에만 사용
 CORS_ALLOW_CREDENTIALS = True
 CSRF_COOKIE_HTTP_ONLY = True
 CSRF_TRUSTED_ORIGINS = [
-    "http://",
+    "http://127.0.0.1:3000",
+    "http://localhost:3000",
 ]
 CORS_EXPOSE_HEADERS = ["Content-Type", "X-CSRFToken"]
 SESSION_COOKIE_SECURE = True
@@ -60,6 +61,7 @@ THIRD_PARTY_APPS = [
 ]
 
 CUSTOM_APPS = [
+    "apps.common",
     "apps.users",
     "apps",
 ]

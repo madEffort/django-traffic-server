@@ -1,6 +1,5 @@
 from django.contrib.auth import authenticate
 from django.middleware import csrf
-from django.http import JsonResponse, HttpResponse
 from ninja_extra import api_controller, route
 from ninja_jwt.authentication import JWTAuth
 from ninja_jwt.tokens import RefreshToken
@@ -9,6 +8,7 @@ from ninja.responses import Response
 from config import settings
 from .models import User
 from .schemas import Error, UserSchema, UserIn, UserOut, JWTToken
+from .utils import get_refresh_token
 
 
 @api_controller("/users", tags=["users"])
@@ -44,7 +44,7 @@ class UserController:
 
         response_data = {"access": access_token, "refresh": refresh_token}
 
-        response = JsonResponse(response_data, status=200)
+        response = Response(response_data, status=200)
         response.set_cookie(
             key=settings.NINJA_JWT["AUTH_COOKIE"],
             value=access_token,
@@ -66,15 +66,13 @@ class UserController:
         # CSRF 토큰 설정
         response["X-CSRFToken"] = csrf.get_token(request)
 
-        return response
+        return response  # 200
 
     @route.post("/logout", response={200: None, 400: Error}, auth=JWTAuth())
     def logout_user_handler(self, request):
         """유저 로그아웃"""
 
-        refresh_token = (
-            request.COOKIES.get(settings.NINJA_JWT["AUTH_COOKIE_REFRESH"])
-        ) or (request.headers.get("Authorization").split(" ")[1])
+        refresh_token: str | None = get_refresh_token(request=request)
 
         if not refresh_token:
             return 400, {"detail": "Failed to logout"}
@@ -82,14 +80,14 @@ class UserController:
         token = RefreshToken(refresh_token)
         token.blacklist()
 
-        response = HttpResponse()
+        response = Response({"detail": "Logout successful"}, status=200)
         response.delete_cookie(settings.NINJA_JWT["AUTH_COOKIE"])
         response.delete_cookie(settings.NINJA_JWT["AUTH_COOKIE_REFRESH"])
         response.delete_cookie("X-CSRFToken")
         response.delete_cookie("csrftoken")
         response["X-CSRFToken"] = None
 
-        return 200, response
+        return response  # 200
 
     @route.delete("/{user_id}", response={204: None, 404: Error}, auth=JWTAuth())
     def delete_user_handler(self, user_id):
@@ -108,7 +106,7 @@ class UserController:
 
         return 200, users
 
-    @route.get("/{user_id}", response={200: UserSchema, 404: Error})
+    @route.get("/{user_id}", response={200: UserSchema, 404: Error}, auth=JWTAuth())
     def get_user_handler(self, user_id: int):
         """유저 단일 조회"""
         user: User | None = User.objects.filter(id=user_id).first()
