@@ -1,17 +1,28 @@
 services:
   app:
     build: .
-    image: my-app-image
-    container_name: my-app-container
+    image: my_app_image
+    container_name: my_app_container
     command: /app/entrypoint.sh
     ports:
-      - "8000:8000"
+      - "8000:8000" # 프로덕션 시 주석
     env_file:
       - .env
     volumes:
       - .:/app
     depends_on:
       - postgres
+
+  nginx:
+    image: nginx:latest
+    container_name: my_nginx_container
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./staticfiles:/app/staticfiles # staticfiles 볼륨 추가
+    ports:
+      - "80:80"
+    depends_on:
+      - app
 
   postgres:
     image: postgres:latest

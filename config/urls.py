@@ -17,10 +17,17 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
 from config.api import api
+
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", api.urls),
     path("", include("django_prometheus.urls")),  # 프로메테우스
 ]
+
+if settings.DEBUG:
+    from django.conf.urls.static import static
+
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

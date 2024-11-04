@@ -5,7 +5,7 @@ from ninja_jwt.authentication import JWTAuth
 from ninja_jwt.tokens import RefreshToken
 from ninja.responses import Response
 
-from config import settings
+from django.conf import settings
 from apps.common.schemas import Error
 from .models import User
 from .schemas import UserSchema, UserIn, UserOut, JWTToken

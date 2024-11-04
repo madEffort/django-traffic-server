@@ -1,6 +1,7 @@
 # Created by https://www.toptal.com/developers/gitignore/api/django,ninja,python,windows,linux,macos
 # Edit at https://www.toptal.com/developers/gitignore?templates=django,ninja,python,windows,linux,macos
 apps/*/migrations/
+staticfiles/
 
 ### Django ###
 *.log
