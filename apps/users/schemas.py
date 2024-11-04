@@ -25,7 +25,3 @@ class UserOut(Schema):
 class JWTToken(Schema):
     access: str
     refresh: str
-
-
-class Error(Schema):
-    detail: str

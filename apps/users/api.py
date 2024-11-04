@@ -6,8 +6,9 @@ from ninja_jwt.tokens import RefreshToken
 from ninja.responses import Response
 
 from config import settings
+from apps.common.schemas import Error
 from .models import User
-from .schemas import Error, UserSchema, UserIn, UserOut, JWTToken
+from .schemas import UserSchema, UserIn, UserOut, JWTToken
 from .utils import get_refresh_token
 
 
@@ -15,14 +16,20 @@ from .utils import get_refresh_token
 class UserController:
 
     @route.post("/create", response={201: UserOut, 400: Error})
-    def post_user_handler(self, data: UserIn):
+    def create_user_handler(self, data: UserIn):
         """유저 생성"""
-        if User.objects.filter(username=data.username).exists():
-            return 400, {"detail": "Username already exists."}
 
-        user: User = User(username=data.username)
-        user.first_name = data.first_name
-        user.last_name = data.last_name
+        user, created = User.objects.get_or_create(
+            username=data.username,
+            defaults={
+                "first_name": data.first_name,
+                "last_name": data.last_name,
+            },
+        )
+
+        if not created:
+            return 400, {"detail": "Username already exists"}
+
         user.set_password(data.password)
         user.save()
 
@@ -90,9 +97,10 @@ class UserController:
         return response  # 200
 
     @route.delete("/{user_id}", response={204: None, 404: Error}, auth=JWTAuth())
-    def delete_user_handler(self, user_id):
+    def delete_user_handler(self, user_id: int):
         """유저 삭제"""
         user: User | None = User.objects.filter(id=user_id).first()
+
         if not user:
             return 404, {"detail": "User not found"}
 
@@ -112,6 +120,6 @@ class UserController:
         user: User | None = User.objects.filter(id=user_id).first()
 
         if not user:
-            return 404, {"detail": "Not Found"}
+            return 404, {"detail": "User not found"}
 
         return 200, user

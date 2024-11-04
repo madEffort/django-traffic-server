@@ -62,6 +62,8 @@ THIRD_PARTY_APPS = [
 
 CUSTOM_APPS = [
     "apps.common",
+    "apps.boards",
+    "apps.comments",
     "apps.users",
     "apps",
 ]
