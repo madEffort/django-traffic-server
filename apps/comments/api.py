@@ -1,6 +1,7 @@
 from ninja_extra import api_controller, route
 from ninja_jwt.authentication import JWTAuth
 
+
 from apps.comments.schemas import CommentOut
 from apps.common.schemas import Error
 from apps.boards.models import Board, Post
