@@ -28,21 +28,20 @@ class UserController:
         )
 
         if not created:
-            return 400, {"detail": "Username already exists"}
+            return 400, {"detail": "Bad Request"}
 
         user.set_password(data.password)
         user.save()
 
         return 201, user
 
-    @route.post("/login", response={200: JWTToken, 401: Error})
+    @route.post("/login", response={200: JWTToken, 404: Error})
     def login_user_handler(self, request, data: UserIn):
         """유저 로그인"""
 
-        user = authenticate(username=data.username, password=data.password)
-
+        user: User | None = authenticate(username=data.username, password=data.password)
         if not user:
-            return 401, {"detail": "Invalid username or password"}
+            return 404, {"detail": "User Not Found"}
 
         # JWT 토큰 생성
         refresh = RefreshToken.for_user(user)
@@ -82,12 +81,12 @@ class UserController:
         refresh_token: str | None = get_refresh_token(request=request)
 
         if not refresh_token:
-            return 400, {"detail": "Failed to logout"}
+            return 400, {"detail": "Bad Request"}
 
         token = RefreshToken(refresh_token)
         token.blacklist()
 
-        response = Response({"detail": "Logout successful"}, status=200)
+        response = Response({"detail": "Logout OK"}, status=200)
         response.delete_cookie(settings.NINJA_JWT["AUTH_COOKIE"])
         response.delete_cookie(settings.NINJA_JWT["AUTH_COOKIE_REFRESH"])
         response.delete_cookie("X-CSRFToken")
@@ -96,13 +95,18 @@ class UserController:
 
         return response  # 200
 
-    @route.delete("/{user_id}", response={204: None, 404: Error}, auth=JWTAuth())
-    def delete_user_handler(self, user_id: int):
+    @route.delete(
+        "/{user_id}", response={204: None, 403: Error, 404: Error}, auth=JWTAuth()
+    )
+    def delete_user_handler(self, request, user_id: int):
         """유저 삭제"""
-        user: User | None = User.objects.filter(id=user_id).first()
 
+        user: User | None = User.objects.filter(id=user_id).first()
         if not user:
-            return 404, {"detail": "User not found"}
+            return 404, {"detail": "User Not Found"}
+
+        if not (request.user == user or request.user.is_staff):
+            return 403, {"detail": "Delete User Forbidden"}
 
         user.delete()
         return 204, None
@@ -110,6 +114,7 @@ class UserController:
     @route.get("", response={200: list[UserOut]})
     def get_users_handler(self):
         """유저 전체 조회"""
+
         users: list[User] = User.objects.all()
 
         return 200, users
@@ -117,9 +122,9 @@ class UserController:
     @route.get("/{user_id}", response={200: UserOut, 404: Error})
     def get_user_handler(self, user_id: int):
         """유저 단일 조회"""
-        user: User | None = User.objects.filter(id=user_id).first()
 
+        user: User | None = User.objects.filter(id=user_id).first()
         if not user:
-            return 404, {"detail": "User not found"}
+            return 404, {"detail": "User Not Found"}
 
         return 200, user

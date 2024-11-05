@@ -16,3 +16,4 @@ class Post(BaseModel):
     )
     title = models.CharField(max_length=255)
     content = models.TextField(blank=False, null=False)
+    is_deleted = models.BooleanField(default=False)
