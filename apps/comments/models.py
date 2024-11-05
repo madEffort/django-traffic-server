@@ -1,3 +1,14 @@
 from django.db import models
+from apps.common.models import BaseModel
 
-# Create your models here.
+
+class Comment(BaseModel):
+
+    author = models.ForeignKey(
+        "users.User", on_delete=models.DO_NOTHING, related_name="comments"
+    )
+    post = models.ForeignKey(
+        "boards.Post", on_delete=models.DO_NOTHING, related_name="comments"
+    )
+    content = models.TextField()
+    is_deleted = models.BooleanField(default=False)
