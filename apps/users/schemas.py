@@ -1,4 +1,3 @@
-from typing import Optional
 from ninja import ModelSchema, Schema
 from .models import User
 
@@ -13,8 +12,8 @@ class UserSchema(ModelSchema):
 class UserIn(Schema):
     username: str
     password: str
-    first_name: Optional[str] | None
-    last_name: Optional[str] | None
+    first_name: str | None = None
+    last_name: str | None = None
 
 
 class UserOut(Schema):

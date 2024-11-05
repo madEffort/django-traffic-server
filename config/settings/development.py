@@ -14,4 +14,5 @@ DATABASES = {
     }
 }
 
+
 STATICFILES_DIRS = [BASE_DIR / "static"]  # 개발 환경 collectstatic 설정

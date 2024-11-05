@@ -4,7 +4,7 @@ from ninja_jwt.tokens import RefreshToken
 from config.api import api
 
 from apps.users.models import User
-from apps.users.schemas import UserSchema
+from apps.users.schemas import UserOut
 
 
 class UserControllerTest(TestCase):
@@ -13,15 +13,16 @@ class UserControllerTest(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.client = TestClient(api)
-
-    def setUp(self):
-        self.user1 = User.objects.create_user(
+        cls.user1 = User.objects.create_user(
             username="user1@example.com", password="password123"
         )
-        self.user2 = User.objects.create_user(
+        cls.user2 = User.objects.create_user(
             username="user2@example.com", password="password123"
         )
-        self.token = RefreshToken.for_user(self.user1)
+        cls.token = RefreshToken.for_user(cls.user1)
+
+    def setUp(self):
+        pass
 
     def test_create_user_handler(self):
         """유저 생성 테스트"""
@@ -35,8 +36,6 @@ class UserControllerTest(TestCase):
             data={
                 "username": "user1@example.com",
                 "password": "password123",
-                "first_name": "user1",
-                "last_name": "user1",
             },
             content_type="application/json",
         )
@@ -60,8 +59,8 @@ class UserControllerTest(TestCase):
 
         # 예상 데이터
         expected_data = [
-            UserSchema.from_orm(self.user1).dict(),
-            UserSchema.from_orm(self.user2).dict(),
+            UserOut.from_orm(self.user1).dict(),
+            UserOut.from_orm(self.user2).dict(),
         ]
 
         assert response.status_code == 200
@@ -75,7 +74,7 @@ class UserControllerTest(TestCase):
             headers={"Authorization": f"Bearer {str(self.token.access_token)}"},
         )
 
-        expected_data = UserSchema.from_orm(self.user1).dict()
+        expected_data = UserOut.from_orm(self.user1).dict()
 
         assert response.status_code == 200
         assert response.json() == expected_data

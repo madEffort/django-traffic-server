@@ -11,6 +11,11 @@ class BoardSchema(ModelSchema):
         fields = ["id", "title", "description", "created_at", "updated_at"]
 
 
+class BoardIn(Schema):
+    title: str
+    description: str
+
+
 class BoardOut(Schema):
     id: int
     title: str

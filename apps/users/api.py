@@ -8,7 +8,7 @@ from ninja.responses import Response
 from django.conf import settings
 from apps.common.schemas import Error
 from .models import User
-from .schemas import UserSchema, UserIn, UserOut, JWTToken
+from .schemas import UserIn, UserOut, JWTToken
 from .utils import get_refresh_token
 
 
@@ -107,14 +107,14 @@ class UserController:
         user.delete()
         return 204, None
 
-    @route.get(response={200: list[UserSchema]})
+    @route.get("", response={200: list[UserOut]})
     def get_users_handler(self):
         """유저 전체 조회"""
         users: list[User] = User.objects.all()
 
         return 200, users
 
-    @route.get("/{user_id}", response={200: UserSchema, 404: Error}, auth=JWTAuth())
+    @route.get("/{user_id}", response={200: UserOut, 404: Error}, auth=JWTAuth())
     def get_user_handler(self, user_id: int):
         """유저 단일 조회"""
         user: User | None = User.objects.filter(id=user_id).first()
