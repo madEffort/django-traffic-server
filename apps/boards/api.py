@@ -2,7 +2,7 @@ from ninja_extra import api_controller, route
 from ninja_jwt.authentication import JWTAuth
 
 from .models import Board, Post
-from .schemas import BoardIn, BoardOut, PostIn, PostOut
+from .schemas import BoardIn, BoardOut, PostIn, PostOut, PostUpdate
 from apps.common.schemas import Error
 from apps.users.models import User
 
@@ -73,3 +73,32 @@ class BoardController:
         posts = posts_query[:10]
 
         return 200, posts
+
+    @route.put(
+        "/{board_id}/posts/{post_id}",
+        response={200: PostOut, 404: Error},
+        auth=JWTAuth(),
+    )
+    def update_post_handler(
+        self, request, board_id: int, post_id: int, data: PostUpdate
+    ):
+
+        board: Board | None = Board.objects.filter(id=board_id).first()
+
+        if not board:
+            return 404, {"detail": "Board not found"}
+
+        post: Post | None = Post.objects.filter(board=board, id=post_id).first()
+
+        if not post:
+            return 404, {"detail": "Post not found"}
+
+        if request.user != post.author:
+            return 403, {"detail": "Permission error"}
+
+        # 부분 업데이트
+        for field, value in data.dict(exclude_unset=True).items():
+            setattr(post, field, value)
+        post.save()
+
+        return 200, post

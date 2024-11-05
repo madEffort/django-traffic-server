@@ -42,6 +42,11 @@ class PostIn(Schema):
     content: str
 
 
+class PostUpdate(Schema):
+    title: str | None = None
+    content: str | None = None
+
+
 class PostOut(Schema):
     id: int
     board: BoardOut
