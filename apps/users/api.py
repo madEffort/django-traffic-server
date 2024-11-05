@@ -114,7 +114,7 @@ class UserController:
 
         return 200, users
 
-    @route.get("/{user_id}", response={200: UserOut, 404: Error}, auth=JWTAuth())
+    @route.get("/{user_id}", response={200: UserOut, 404: Error})
     def get_user_handler(self, user_id: int):
         """유저 단일 조회"""
         user: User | None = User.objects.filter(id=user_id).first()

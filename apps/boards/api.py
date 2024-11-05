@@ -1,4 +1,4 @@
-from ninja_extra import api_controller, route
+from ninja_extra import api_controller, route, throttle
 from ninja_jwt.authentication import JWTAuth
 
 from .models import Board, Post
@@ -34,8 +34,9 @@ class BoardController:
         response={201: PostOut, 401: Error, 404: Error},
         auth=JWTAuth(),
     )
+    @throttle
     def create_post_handler(self, request, board_id: int, data: PostIn):
-        """게시판 생성"""
+        """게시글 생성"""
 
         if not isinstance(request.user, User):
             return 401, {"detail": "Authentication credentials were not provided"}
@@ -76,7 +77,7 @@ class BoardController:
 
     @route.put(
         "/{board_id}/posts/{post_id}",
-        response={200: PostOut, 404: Error},
+        response={200: PostOut, 403: Error, 404: Error},
         auth=JWTAuth(),
     )
     def update_post_handler(

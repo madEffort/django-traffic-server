@@ -191,3 +191,20 @@ NINJA_JWT = {
     "AUTH_COOKIE_PATH": "/",
     "AUTH_COOKIE_SAMESITE": "Lax",
 }
+
+NINJA_EXTRA = {
+    "PAGINATION_CLASS": "ninja_extra.pagination.PageNumberPaginationExtra",
+    "PAGINATION_PER_PAGE": 100,
+    "INJECTOR_MODULES": [],
+    "THROTTLE_CLASSES": [
+        "ninja_extra.throttling.AnonRateThrottle",
+        "ninja_extra.throttling.UserRateThrottle",
+    ],
+    "THROTTLE_RATES": {
+        "user": "1000/day",
+        "anon": "100/day",
+    },
+    "NUM_PROXIES": None,
+    "ORDERING_CLASS": "ninja_extra.ordering.Ordering",
+    "SEARCHING_CLASS": "ninja_extra.searching.Search",
+}
