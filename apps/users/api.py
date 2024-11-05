@@ -107,7 +107,7 @@ class UserController:
         user.delete()
         return 204, None
 
-    @route.get("/", response={200: list[UserSchema]})
+    @route.get(response={200: list[UserSchema]})
     def get_users_handler(self):
         """유저 전체 조회"""
         users: list[User] = User.objects.all()
