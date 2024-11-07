@@ -33,6 +33,7 @@ class CommentController:
     @route.put(
         "/{board_id}/posts/{post_id}/comments/{comment_id}",
         response={200: CommentOut, 404: Error},
+        auth=JWTAuth(),
     )
     @transaction.atomic
     def update_comment_handler(

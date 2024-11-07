@@ -116,7 +116,11 @@ class BoardController:
     게시판 핸들러
     """
 
-    @route.post("", response={201: BoardOut, 400: Error})
+    @route.post(
+        "",
+        response={201: BoardOut, 400: Error},
+        auth=JWTAuth(),
+    )
     def create_board_handler(self, data: BoardIn):
 
         board, created = Board.objects.get_or_create(
