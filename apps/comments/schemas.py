@@ -14,6 +14,7 @@ class CommentSchema(ModelSchema):
             "author",
             "post",
             "content",
+            "parent",
             "is_deleted",
             "created_at",
             "updated_at",
@@ -21,10 +22,13 @@ class CommentSchema(ModelSchema):
 
 
 class CommentIn(Schema):
+    parent: int | None = None
     content: str
 
 
 class CommentOut(Schema):
     id: int
+    parent: int | None = None
     author: UserOut
     content: str
+    replies: list["CommentOut"] = []

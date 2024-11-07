@@ -89,9 +89,40 @@ class CommentController:
 
         _, post = self.get_board_and_post(board_id=board_id, post_id=post_id)
 
-        comments = post.comments.all()
+        comments: list[Comment] = post.comments.filter(is_deleted=False)
+        comment_dict = {comment.id: comment for comment in comments}
 
-        return 200, comments
+        root_comments = []
+
+        for comment in comments:
+            if comment.parent is None:
+                root_comments.append(comment)
+            else:
+                parent_comment = comment_dict[comment.parent.id]
+                if not hasattr(parent_comment, "replies"):
+                    parent_comment.replies = []
+                parent_comment.replies.add(comment)
+
+        comments_data = [
+            CommentOut(
+                id=comment.id,
+                parent=comment.parent.id if comment.parent else None,
+                author=comment.author,
+                content=comment.content,
+                replies=[
+                    CommentOut(
+                        id=reply.id,
+                        parent=reply.parent.id if reply.parent else None,
+                        author=reply.author,
+                        content=reply.content,
+                    )
+                    for reply in comment.replies.filter(is_deleted=False)
+                ],
+            )
+            for comment in root_comments
+        ]
+
+        return 200, comments_data
 
     @route.post(
         "/{board_id}/posts/{post_id}/comments",
@@ -109,8 +140,17 @@ class CommentController:
         if post.is_deleted:
             raise Http404("Post Not Found")
 
+        parent_comment = None
+        if data.parent:
+            parent_comment: Comment | None = Comment.objects.filter(
+                post=post, id=data.parent
+            ).first()
+
+            if not parent_comment:
+                raise Http404("Parent Not Found")
+
         comment = Comment.objects.create(
-            author=request.user, post=post, content=data.content
+            author=request.user, post=post, content=data.content, parent=parent_comment
         )
 
         return 201, comment
