@@ -1,4 +1,3 @@
-from urllib import request
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.db import transaction
@@ -59,11 +58,18 @@ class CommentController:
     @route.delete(
         "/{board_id}/posts/{post_id}/comments/{comment_id}",
         response={204: None, 404: Error},
+        auth=JWTAuth(),
     )
     @transaction.atomic
-    def delete_comment_handler(self, board_id: int, post_id: int, comment_id: int):
+    def delete_comment_handler(
+        self, request, board_id: int, post_id: int, comment_id: int
+    ):
         """댓글 삭제"""
         _, post = self.get_board_and_post(board_id=board_id, post_id=post_id)
+
+        import logging
+
+        logging.warn(request.user)
 
         comment: Comment = post.comments.filter(id=comment_id).first()
 
