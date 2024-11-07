@@ -1,3 +1,4 @@
+from urllib import request
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.db import transaction
@@ -42,7 +43,10 @@ class CommentController:
 
         _, post = self.get_board_and_post(board_id=board_id, post_id=post_id)
 
-        comment: Comment = post.comments.filter(id=comment_id).first()
+        comment: Comment | None = post.comments.filter(id=comment_id).first()
+
+        if not comment:
+            raise Http404("Comment Not Found")
 
         if not request.user == comment.author:
             raise PermissionDenied("Update Comment Forbidden")
@@ -51,6 +55,27 @@ class CommentController:
         comment.save()
 
         return 200, comment
+
+    @route.delete(
+        "/{board_id}/posts/{post_id}/comments/{comment_id}",
+        response={204: None, 404: Error},
+    )
+    @transaction.atomic
+    def delete_comment_handler(self, board_id: int, post_id: int, comment_id: int):
+        """댓글 삭제"""
+        _, post = self.get_board_and_post(board_id=board_id, post_id=post_id)
+
+        comment: Comment = post.comments.filter(id=comment_id).first()
+
+        if not comment:
+            raise Http404("Comment Not Found")
+
+        if not (request.user == comment.author or request.user.is_staff):
+            raise PermissionDenied("Delete Comment Forbidden")
+
+        comment.delete()
+
+        return 204, None
 
     @route.get(
         "/{board_id}/posts/{post_id}/comments",
