@@ -1,6 +1,7 @@
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.db import transaction
+from django.core.exceptions import PermissionDenied
 
 from ninja_extra import api_controller, route
 from ninja_jwt.authentication import JWTAuth
@@ -29,6 +30,28 @@ class CommentController:
     댓글 핸들러
     """
 
+    @route.put(
+        "/{board_id}/posts/{post_id}/comments/{comment_id}",
+        response={200: CommentOut, 404: Error},
+    )
+    @transaction.atomic
+    def update_comment_handler(
+        self, request, board_id: int, post_id: int, comment_id: int, data: CommentIn
+    ):
+        """댓글 수정"""
+
+        _, post = self.get_board_and_post(board_id=board_id, post_id=post_id)
+
+        comment: Comment = post.comments.filter(id=comment_id).first()
+
+        if not request.user == comment.author:
+            raise PermissionDenied("Update Comment Forbidden")
+
+        comment.content = data.content
+        comment.save()
+
+        return 200, comment
+
     @route.get(
         "/{board_id}/posts/{post_id}/comments",
         response={200: list[CommentOut], 404: Error},
@@ -52,6 +75,7 @@ class CommentController:
         self, request, board_id: int, post_id: int, data: CommentIn
     ):
         """댓글 생성"""
+
         _, post = self.get_board_and_post(board_id=board_id, post_id=post_id)
 
         if post.is_deleted:

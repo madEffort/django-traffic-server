@@ -18,5 +18,6 @@ DATABASES = {
         "PASSWORD": DB_PASSWORD,
         "HOST": DB_HOST,
         "PORT": DB_PORT,
+        "CONN_MAX_AGE": 60,  # 최대 수명 시간 (초 단위)
     }
 }
