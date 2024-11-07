@@ -25,6 +25,10 @@ class CommentController:
 
         return board, post
 
+    """
+    댓글 핸들러
+    """
+
     @route.get(
         "/{board_id}/posts/{post_id}/comments",
         response={200: list[CommentOut], 404: Error},
@@ -39,23 +43,22 @@ class CommentController:
         return 200, comments
 
     @route.post(
-        "/{board_id}/posts/{post_id}",
+        "/{board_id}/posts/{post_id}/comments",
         response={201: CommentOut, 404: Error},
         auth=JWTAuth(),
     )
+    @transaction.atomic
     def create_comment_handler(
         self, request, board_id: int, post_id: int, data: CommentIn
     ):
         """댓글 생성"""
-        with transaction.atomic():
+        _, post = self.get_board_and_post(board_id=board_id, post_id=post_id)
 
-            _, post = self.get_board_and_post(board_id=board_id, post_id=post_id)
+        if post.is_deleted:
+            raise Http404("Post Not Found")
 
-            if post.is_deleted:
-                raise Http404("Post Not Found")
-
-            comment = Comment.objects.create(
-                author=request.user, post=post, content=data.content
-            )
+        comment = Comment.objects.create(
+            author=request.user, post=post, content=data.content
+        )
 
         return 201, comment

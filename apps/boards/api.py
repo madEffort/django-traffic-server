@@ -1,7 +1,10 @@
 from django.http import Http404
+from django.core.exceptions import PermissionDenied
+from django.shortcuts import get_object_or_404
+from django.db import transaction
 from ninja_extra import api_controller, route, throttle
 from ninja_jwt.authentication import JWTAuth
-from django.shortcuts import get_object_or_404
+
 
 from apps.common.schemas import Error
 
@@ -25,30 +28,12 @@ class BoardController:
     게시글 핸들러
     """
 
-    @route.post(
-        "/{board_id}/posts/create",
-        response={201: PostOut, 404: Error},
-        auth=JWTAuth(),
-    )
-    @throttle
-    def create_post_handler(self, request, board_id: int, data: PostIn):
-        """게시글 생성"""
-
-        board: Board | None = Board.objects.filter(id=board_id).first()
-        if not board:
-            return 404, {"detail": "Board Not Found"}
-
-        post: Post = Post.objects.create(
-            title=data.title, content=data.content, author=request.user, board=board
-        )
-
-        return 201, post
-
     @route.put(
         "/{board_id}/posts/{post_id}",
         response={200: PostOut, 403: Error, 404: Error},
         auth=JWTAuth(),
     )
+    @transaction.atomic
     def update_post_handler(
         self, request, board_id: int, post_id: int, data: PostUpdate
     ):
@@ -57,7 +42,7 @@ class BoardController:
         _, post = self.get_board_and_post(board_id=board_id, post_id=post_id)
 
         if not (request.user == post.author or request.user.is_staff):
-            return 403, {"detail": "Update Post Forbidden"}
+            raise PermissionDenied("Update Post Forbidden")
 
         # 부분 업데이트
         for field, value in data.dict(exclude_unset=True).items():
@@ -71,18 +56,37 @@ class BoardController:
         response={200: PostOut, 403: Error, 404: Error},
         auth=JWTAuth(),
     )
+    @transaction.atomic
     def delete_post_handler(self, request, board_id: int, post_id: int):
         """게시글 삭제"""
 
         _, post = self.get_board_and_post(board_id=board_id, post_id=post_id)
 
         if not (request.user == post.author or request.user.is_staff):
-            return 403, {"detail": "Delete Post Forbidden"}
+            raise PermissionDenied("Delete Post Forbidden")
 
         post.is_deleted = True
         post.save()
 
         return 200, post
+
+    @route.post(
+        "/{board_id}/posts",
+        response={201: PostOut, 404: Error},
+        auth=JWTAuth(),
+    )
+    @throttle
+    @transaction.atomic
+    def create_post_handler(self, request, board_id: int, data: PostIn):
+        """게시글 생성"""
+
+        board: Board = get_object_or_404(Board, id=board_id)
+
+        post: Post = Post.objects.create(
+            title=data.title, content=data.content, author=request.user, board=board
+        )
+
+        return 201, post
 
     @route.get("/{board_id}/posts", response={200: list[PostOut], 404: Error})
     def get_posts_handler(
@@ -112,7 +116,7 @@ class BoardController:
     게시판 핸들러
     """
 
-    @route.post("/create", response={201: BoardOut, 400: Error})
+    @route.post("", response={201: BoardOut, 400: Error})
     def create_board_handler(self, data: BoardIn):
 
         board, created = Board.objects.get_or_create(
