@@ -11,10 +11,10 @@ class CommentSchema(ModelSchema):
         model = Comment
         fields = [
             "id",
+            "parent",
             "author",
             "post",
             "content",
-            "parent",
             "is_deleted",
             "created_at",
             "updated_at",
@@ -29,6 +29,9 @@ class CommentIn(Schema):
 class CommentOut(Schema):
     id: int
     parent: int | None = None
-    author: UserOut
     content: str
-    replies: list["CommentOut"] = []
+    author: UserOut
+    is_deleted: bool
+
+    class Config:
+        orm_mode = True

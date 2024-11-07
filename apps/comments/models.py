@@ -21,6 +21,6 @@ class Comment(BaseModel):
         return self.parent is not None
 
     def clean(self):
-        """1 depth 댓글만 허용하도록 검증"""
+        """1 depth 대댓글만 허용하도록 검증"""
         if self.parent and self.parent.parent:
             raise ValidationError("Only 1 depth replies are allowed.")

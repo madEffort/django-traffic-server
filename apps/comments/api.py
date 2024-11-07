@@ -5,7 +5,11 @@ from django.core.exceptions import PermissionDenied
 
 from ninja_extra import api_controller, route
 from ninja_jwt.authentication import JWTAuth
-
+from ninja_extra.pagination import (
+    paginate,
+    PageNumberPaginationExtra,
+    PaginatedResponseSchema,
+)
 
 from apps.comments.schemas import CommentIn, CommentOut
 from apps.common.schemas import Error
@@ -29,6 +33,39 @@ class CommentController:
     """
     댓글 핸들러
     """
+
+    @route.get(
+        "/{board_id}/posts/{post_id}/comments/{comment_id}/replies",
+        response=PaginatedResponseSchema[CommentOut],
+    )
+    @paginate(PageNumberPaginationExtra, page_size=20)
+    def get_replies_handler(self, board_id: int, post_id: int, comment_id: int):
+        """대댓글 조회 - 페이지네이션(20개)"""
+
+        comment: Comment = get_object_or_404(
+            Comment,
+            id=comment_id,
+            post_id=post_id,
+            parent__isnull=True,
+            is_deleted=False,
+        )
+
+        replies: list[Comment] = comment.replies.filter(
+            is_deleted=False
+        ).select_related("author")
+
+        replies_data = [
+            CommentOut(
+                id=reply.id,
+                parent=reply.parent.id if reply.parent else None,
+                content=reply.content,
+                author=reply.author,
+                is_deleted=reply.is_deleted,
+            )
+            for reply in replies
+        ]
+
+        return replies_data
 
     @route.put(
         "/{board_id}/posts/{post_id}/comments/{comment_id}",
@@ -82,47 +119,19 @@ class CommentController:
 
     @route.get(
         "/{board_id}/posts/{post_id}/comments",
-        response={200: list[CommentOut], 404: Error},
+        response=PaginatedResponseSchema[CommentOut],
     )
+    @paginate(PageNumberPaginationExtra, page_size=20)
     def get_comments_handler(self, board_id: int, post_id: int):
-        """댓글 전체 조회"""
+        """루트 댓글 전체 조회 - 페이지네이션(20개)"""
 
         _, post = self.get_board_and_post(board_id=board_id, post_id=post_id)
 
-        comments: list[Comment] = post.comments.filter(is_deleted=False)
-        comment_dict = {comment.id: comment for comment in comments}
+        root_comments: list[Comment] = post.comments.filter(
+            is_deleted=False, parent__isnull=True
+        ).select_related("author")
 
-        root_comments = []
-
-        for comment in comments:
-            if comment.parent is None:
-                root_comments.append(comment)
-            else:
-                parent_comment = comment_dict[comment.parent.id]
-                if not hasattr(parent_comment, "replies"):
-                    parent_comment.replies = []
-                parent_comment.replies.add(comment)
-
-        comments_data = [
-            CommentOut(
-                id=comment.id,
-                parent=comment.parent.id if comment.parent else None,
-                author=comment.author,
-                content=comment.content,
-                replies=[
-                    CommentOut(
-                        id=reply.id,
-                        parent=reply.parent.id if reply.parent else None,
-                        author=reply.author,
-                        content=reply.content,
-                    )
-                    for reply in comment.replies.filter(is_deleted=False)
-                ],
-            )
-            for comment in root_comments
-        ]
-
-        return 200, comments_data
+        return root_comments
 
     @route.post(
         "/{board_id}/posts/{post_id}/comments",
