@@ -68,10 +68,6 @@ class CommentController:
         """댓글 삭제"""
         _, post = self.get_board_and_post(board_id=board_id, post_id=post_id)
 
-        import logging
-
-        logging.warn(request.user)
-
         comment: Comment = post.comments.filter(id=comment_id).first()
 
         if not comment:
