@@ -10,6 +10,6 @@ api = NinjaExtraAPI(title="Django Ninja Boilerplate API")
 api.register_controllers(
     NinjaJWTDefaultController,
     UserController,
+    CommentController,  # Board 보다 위에
     BoardController,
-    CommentController,
 )
