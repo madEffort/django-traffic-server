@@ -39,7 +39,13 @@ class PostDocument(Document):
 
     class Django:
         model = Post
-        fields = ["id", "views", "is_deleted", "created_at", "updated_at"]
+        fields = [
+            "id",
+            "views",
+            "is_deleted",
+            "created_at",
+            "updated_at",
+        ]
 
 
 # python manage.py search_index --rebuild

@@ -88,16 +88,16 @@ services:
     depends_on:
       - elasticsearch
 
-  # redis:
-  #   image: redis
-  #   container_name: my_redis_container
-  #   command: redis-server --requirepass ${REDIS_PASSWORD}
-  #   environment:
-  #     - REDIS_PASSWORD=${REDIS_PASSWORD}
-  #   ports:
-  #     - "6379:6379"
-  #   volumes:
-  #     - redis_data:/data
+  redis:
+    image: redis:7
+    container_name: my_redis_container
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
 
   # celery:
   #   image: my_app_image
@@ -115,7 +115,7 @@ services:
 volumes:
   postgres_data:
   grafana_data:
-  # redis_data:
+  redis_data:
   es_data:
 # 실행
 # docker-compose --env-file .env up -d
