@@ -69,10 +69,13 @@ services:
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
       - xpack.security.enabled=false
       - xpack.security.transport.ssl.enabled=false
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
     ports:
       - "9200:9200"
     volumes:
       - es_data:/usr/share/elasticsearch/data
+    command: >
+      bash -c "bin/elasticsearch-plugin install analysis-nori --batch && bin/elasticsearch"
 
   kibana:
     image: docker.elastic.co/kibana/kibana:8.5.1
@@ -85,9 +88,34 @@ services:
     depends_on:
       - elasticsearch
 
+  # redis:
+  #   image: redis
+  #   container_name: my_redis_container
+  #   command: redis-server --requirepass ${REDIS_PASSWORD}
+  #   environment:
+  #     - REDIS_PASSWORD=${REDIS_PASSWORD}
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis_data:/data
+
+  # celery:
+  #   image: my_app_image
+  #   container_name: my_celery_container
+  #   command: celery -A config worker -E -l info
+  #   volumes:
+  #     - .:/app
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     - postgres
+  #     - redis
+  #     - app
+
 volumes:
   postgres_data:
   grafana_data:
+  # redis_data:
   es_data:
 # 실행
 # docker-compose --env-file .env up -d

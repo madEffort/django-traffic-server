@@ -57,6 +57,7 @@ THIRD_PARTY_APPS = [
     "ninja_jwt",
     "ninja_jwt.token_blacklist",
     "django_prometheus",
+    "django_elasticsearch_dsl",
 ]
 
 CUSTOM_APPS = [
@@ -207,4 +208,13 @@ NINJA_EXTRA = {
     "NUM_PROXIES": None,
     "ORDERING_CLASS": "ninja_extra.ordering.Ordering",
     "SEARCHING_CLASS": "ninja_extra.searching.Search",
+}
+
+# elasticsearch
+
+ELASTICSEARCH_DSL = {
+    "default": {
+        "hosts": "http://elasticsearch:9200",
+        "http_auth": (config("ELASTIC_USER"), config("ELASTIC_PASSWORD")),
+    }
 }

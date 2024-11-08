@@ -5,11 +5,13 @@ from django.db import transaction
 from ninja_extra import api_controller, route, throttle
 from ninja_jwt.authentication import JWTAuth
 
+from elasticsearch_dsl.query import MultiMatch
 
 from apps.common.schemas import Error
 
 from .models import Board, Post
 from .schemas import BoardIn, BoardOut, PostIn, PostOut, PostUpdate
+from .documents import PostDocument
 
 
 @api_controller("/boards", tags=["boards"])
@@ -47,6 +49,17 @@ class BoardController:
         # 부분 업데이트
         for field, value in data.dict(exclude_unset=True).items():
             setattr(post, field, value)
+        post.save()
+
+        return 200, post
+
+    @route.get("/{board_id}/posts/{post_id}", response={200: PostOut, 404: Error})
+    @transaction.atomic
+    def get_post_handler(self, board_id: int, post_id: int):
+
+        post: Post = self.get_board_and_post(board_id=board_id, post_id=post_id)[1]
+
+        post.views += 1
         post.save()
 
         return 200, post
@@ -90,9 +103,13 @@ class BoardController:
 
     @route.get("/{board_id}/posts", response={200: list[PostOut], 404: Error})
     def get_posts_handler(
-        self, board_id: int, last_id: int = None, first_id: int = None
+        self,
+        board_id: int,
+        last_id: int = None,
+        first_id: int = None,
+        keyword: str | None = None,
     ):
-        """복수 게시글 조회"""
+        """복수 게시글 조회 + 게시글 검색(elasticsearch)"""
 
         board: Board | None = Board.objects.filter(id=board_id).first()
         if not board:
@@ -107,6 +124,10 @@ class BoardController:
 
         if first_id is not None:
             posts_query = posts_query.filter(id__gt=first_id)
+
+        if keyword is not None:
+            q = MultiMatch(query=keyword, fields=["title", "content"])
+            posts_query = PostDocument.search().query(q)
 
         posts = posts_query[:10]
 

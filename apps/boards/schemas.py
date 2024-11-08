@@ -32,6 +32,7 @@ class PostSchema(ModelSchema):
             "author",
             "title",
             "content",
+            "views",
             "is_deleted",
             "created_at",
             "updated_at",
@@ -54,6 +55,7 @@ class PostOut(Schema):
     author: UserOut
     title: str
     content: str
+    views: int
     is_deleted: bool
     created_at: datetime
     updated_at: datetime
