@@ -32,6 +32,3 @@ class CommentOut(Schema):
     content: str
     author: UserOut
     is_deleted: bool
-
-    class Config:
-        orm_mode = True
