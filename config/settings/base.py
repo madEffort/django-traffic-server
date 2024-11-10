@@ -219,3 +219,15 @@ ELASTICSEARCH_DSL = {
         "http_auth": (config("ELASTIC_USER"), config("ELASTIC_PASSWORD")),
     }
 }
+
+# redis
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": f"redis://:{config('REDIS_PASSWORD')}@redis:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+    }
+}

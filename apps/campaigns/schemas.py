@@ -24,6 +24,8 @@ class CampaignSchema(ModelSchema):
 class CampaignIn(Schema):
     title: str
     content: str
+    start_date: datetime
+    end_date: datetime
 
 
 class CampaignOut(Schema):
