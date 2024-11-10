@@ -20,6 +20,7 @@ django-ninja-extra==0.21.4
 django-ninja-jwt==5.3.4
 django-prometheus==2.3.1
 django-redis==5.4.0
+dnspython==2.7.0
 elastic-transport==8.15.1
 elasticsearch==8.15.1
 elasticsearch-dsl==8.15.4
@@ -42,6 +43,7 @@ pydantic==2.9.2
 pydantic_core==2.23.4
 pyflakes==3.2.0
 PyJWT==2.9.0
+pymongo==4.10.1
 pytest==8.3.3
 pytest-django==4.9.0
 python-dateutil==2.9.0.post0
