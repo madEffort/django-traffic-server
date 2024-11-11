@@ -17,9 +17,7 @@ class CampaignController:
         return f"campaign:{campaign_id}"
 
     @route.post("/{campaign_id}", response={200: Success, 404: Error})
-    def click_campaign_handler(
-        self, request, campaign_id: int, is_true_view: bool | None = None
-    ):
+    def save_campaign_click_history_handler(self, request, campaign_id: int):
         """캠페인(광고) 클릭 기록 저장 - mongodb에 클릭 기록 저장"""
         client_ip = request.META.get("REMOTE_ADDR")
         CampaignClickHistory(
@@ -31,7 +29,7 @@ class CampaignController:
         return 200, {"detail": "Clicked"}
 
     @route.get("/{campaign_id}", response={200: CampaignOut, 404: Error})
-    def view_campaign_handler(
+    def save_campaign_view_history_handler(
         self, request, campaign_id: int, is_true_view: bool | None = None
     ):
         """캠페인(광고) 조회 기록 저장 - mongodb에 조회 기록 저장"""
