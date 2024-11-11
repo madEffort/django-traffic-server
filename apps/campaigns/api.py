@@ -2,12 +2,12 @@ from django.core.cache import cache
 from django.shortcuts import get_object_or_404
 from ninja_extra import api_controller, route
 
-from apps.common.schemas import Error
+from apps.common.schemas import Error, Success
 
 from .models import Campaign
 from .schemas import CampaignIn, CampaignOut
 
-from .mongo_models import CampaignHistory
+from .mongo_models import CampaignViewHistory, CampaignClickHistory
 
 
 @api_controller("/campaigns", tags=["campaigns"])
@@ -16,14 +16,28 @@ class CampaignController:
     def get_campaign_cache_key(self, campaign_id: int) -> str:
         return f"campaign:{campaign_id}"
 
+    @route.post("/{campaign_id}", response={200: Success, 404: Error})
+    def click_campaign_handler(
+        self, request, campaign_id: int, is_true_view: bool | None = None
+    ):
+        """캠페인(광고) 클릭 기록 저장 - mongodb에 클릭 기록 저장"""
+        client_ip = request.META.get("REMOTE_ADDR")
+        CampaignClickHistory(
+            campaign_id=campaign_id,
+            user_id=request.user.id,
+            client_ip=client_ip,
+        ).save()
+
+        return 200, {"detail": "Clicked"}
+
     @route.get("/{campaign_id}", response={200: CampaignOut, 404: Error})
     def view_campaign_handler(
         self, request, campaign_id: int, is_true_view: bool | None = None
     ):
-        """캠페인(광고) 단일 조회 - mongodb에 조회기록 저장"""
+        """캠페인(광고) 조회 기록 저장 - mongodb에 조회 기록 저장"""
         client_ip = request.META.get("REMOTE_ADDR")
 
-        CampaignHistory(
+        CampaignViewHistory(
             campaign_id=campaign_id,
             user_id=request.user.id,
             client_ip=client_ip,
