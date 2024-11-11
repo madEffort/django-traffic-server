@@ -14,6 +14,7 @@ django-traffic-server
 users 앱
  - JWT 방식을 이용한 로그인 기능을 적용, 로그아웃 시에는 리프레시 토큰을 블랙리스트에 등록하는 방식
  - JWT 토큰은 기본적으로 쿠키에 저장되며, iOS의 경우 쿠키를 지원하지 않아 헤더에서 토큰을 읽는 방식도 함께 적용
+ - tests.py 작성(해야되는데...)
 
 boards 앱
  - 게시물 api에 transaction.atomic을 사용하여 낙관적 동시성 제어를 적용
