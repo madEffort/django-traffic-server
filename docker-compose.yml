@@ -12,6 +12,7 @@ services:
       - .:/app
     depends_on:
       - postgres
+      - mongodb
 
   nginx:
     image: nginx:latest
@@ -106,7 +107,7 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
     ports:
-      - "28017:27017" # 맥 로컬 몽고db 때문에 로컬 포트 28017로 변경
+      - "27018:27017" # 맥 로컬 몽고db 때문에 로컬 포트 27018로 변경
     volumes:
       - mongo_data:/data/db
 

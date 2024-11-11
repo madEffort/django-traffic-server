@@ -7,6 +7,8 @@ from apps.common.schemas import Error
 from .models import Campaign
 from .schemas import CampaignIn, CampaignOut
 
+from .mongo_models import CampaignHistory
+
 
 @api_controller("/campaigns", tags=["campaigns"])
 class CampaignController:
@@ -15,8 +17,18 @@ class CampaignController:
         return f"campaign:{campaign_id}"
 
     @route.get("/{campaign_id}", response={200: CampaignOut, 404: Error})
-    def get_campaign_handler(self, campaign_id: int):
-        """캠페인(광고) 단일 조회"""
+    def view_campaign_handler(
+        self, request, campaign_id: int, is_true_view: bool | None = None
+    ):
+        """캠페인(광고) 단일 조회 - mongodb에 조회기록 저장"""
+        client_ip = request.META.get("REMOTE_ADDR")
+
+        CampaignHistory(
+            campaign_id=campaign_id,
+            user_id=request.user.id,
+            client_ip=client_ip,
+            is_true_view=is_true_view,
+        ).save()
 
         cache_key = self.get_campaign_cache_key(campaign_id=campaign_id)
 
