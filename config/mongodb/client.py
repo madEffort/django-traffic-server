@@ -1,9 +1,5 @@
-from mongoengine import connect
-from . import settings
+from pymongo import MongoClient
+from .settings import MONGO_URI, MONGO_DB_NAME
 
-
-def initialize_mongo_connection():
-    connect(
-        db=settings.MONGO_DB_NAME,
-        host=settings.MONGO_URI,
-    )
+client = MongoClient(MONGO_URI)
+db = client[MONGO_DB_NAME]

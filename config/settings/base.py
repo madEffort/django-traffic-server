@@ -231,7 +231,3 @@ CACHES = {
         },
     }
 }
-
-# from config.mongodb.client import initialize_mongo_connection  # noqa
-
-# initialize_mongo_connection()

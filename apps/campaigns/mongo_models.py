@@ -1,21 +1,23 @@
+from dataclasses import dataclass, field, asdict
 from datetime import datetime
-from mongoengine import Document, StringField, BooleanField, DateTimeField, LongField
 
 
-class CampaignViewHistory(Document):
-    campaign_id = LongField()
-    user_id = LongField()
-    client_ip = StringField()
-    is_true_view = BooleanField(default=False)
-    created_at = DateTimeField(default=datetime.now)
+@dataclass
+class BaseCampaignHistory:
+    campaign_id: int
+    user_id: int
+    client_ip: str
+    created_at: datetime = field(default_factory=datetime.now)
 
-    meta = {"collection": "campaign_view_history"}
+    def to_dict(self):
+        return {k: v for k, v in asdict(self).items() if v is not None}
 
 
-class CampaignClickHistory(Document):
-    campaign_id = LongField()
-    user_id = LongField()
-    client_ip = StringField()
-    created_at = DateTimeField(default=datetime.now)
+@dataclass
+class CampaignViewHistory(BaseCampaignHistory):
+    is_true_view: bool | None = None
 
-    meta = {"collection": "campaign_click_history"}
+
+@dataclass
+class CampaignClickHistory(BaseCampaignHistory):
+    pass

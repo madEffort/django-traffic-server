@@ -7,4 +7,4 @@ MONGO_HOST = config("MONGO_HOST")
 MONGO_PORT = config("MONGO_PORT")
 MONGO_DB_NAME = config("MONGO_DB_NAME")
 
-MONGO_URI = f"mongodb://{MONGO_USER}:{MONGO_PASSWORD}@{MONGO_HOST}:{MONGO_PORT}/{MONGO_DB_NAME}?authSource=admin"
+MONGO_URI = f"mongodb://{MONGO_USER}:{MONGO_PASSWORD}@{MONGO_HOST}:{MONGO_PORT}/{MONGO_DB_NAME}?authSource=admin&retryWrites=true&w=majority"

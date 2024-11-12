@@ -8,6 +8,10 @@ from .models import Campaign
 from .schemas import CampaignIn, CampaignOut
 
 from .mongo_models import CampaignViewHistory, CampaignClickHistory
+from config.mongodb.collections import (
+    campaign_click_collection,
+    campaign_view_collection,
+)
 
 
 @api_controller("/campaigns", tags=["campaigns"])
@@ -19,12 +23,16 @@ class CampaignController:
     @route.post("/{campaign_id}", response={200: Success, 404: Error})
     def save_campaign_click_history_handler(self, request, campaign_id: int):
         """캠페인(광고) 클릭 기록 저장 - mongodb에 클릭 기록 저장"""
+
         client_ip = request.META.get("REMOTE_ADDR")
-        CampaignClickHistory(
-            campaign_id=campaign_id,
-            user_id=request.user.id,
-            client_ip=client_ip,
-        ).save()
+
+        campaign_click_collection.insert_one(
+            CampaignClickHistory(
+                campaign_id=campaign_id,
+                user_id=request.user.id,
+                client_ip=client_ip,
+            ).to_dict()
+        )
 
         return 200, {"detail": "Clicked"}
 
@@ -35,12 +43,14 @@ class CampaignController:
         """캠페인(광고) 조회 기록 저장 - mongodb에 조회 기록 저장"""
         client_ip = request.META.get("REMOTE_ADDR")
 
-        CampaignViewHistory(
-            campaign_id=campaign_id,
-            user_id=request.user.id,
-            client_ip=client_ip,
-            is_true_view=is_true_view,
-        ).save()
+        campaign_view_collection.insert_one(
+            CampaignViewHistory(
+                campaign_id=campaign_id,
+                user_id=request.user.id,
+                client_ip=client_ip,
+                is_true_view=is_true_view,
+            ).to_dict()
+        )
 
         cache_key = self.get_campaign_cache_key(campaign_id=campaign_id)
 
