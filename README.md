@@ -5,7 +5,8 @@
 
 
 <h4 align="center">
-개발 중 입니다...</h4>
+Django Traffic Server는 데이터 수집, 분석 및 모니터링을 위한 시스템으로, 각종 API 기능과 로그 처리 파이프라인을 구현하고 있습니다.</h4>
+
 
 사용 기술 스택
  - Elasticsearch
