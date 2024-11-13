@@ -1,11 +1,12 @@
 from django.core.cache import cache
 from django.shortcuts import get_object_or_404
 from ninja_extra import api_controller, route
+from ninja_jwt.authentication import JWTAuth
 
 from apps.common.schemas import Error, Success
 
 from .models import Campaign
-from .schemas import CampaignIn, CampaignOut
+from .schemas import CampaignIn, CampaignOut, CampaignStatOut
 
 from .mongo_models import CampaignViewHistory, CampaignClickHistory
 from config.mongodb.collections import (
@@ -13,7 +14,7 @@ from config.mongodb.collections import (
     campaign_view_collection,
 )
 
-from .tasks import get_aggregate_campaigns_data
+from .tasks import get_aggregate_campaigns_data, insert_campaign_stats
 
 
 @api_controller("/campaigns", tags=["campaigns"])
@@ -22,13 +23,17 @@ class CampaignController:
     def get_campaign_cache_key(self, campaign_id: int) -> str:
         return f"campaign:{campaign_id}"
 
-    @route.get("/history", response={200: list[dict], 404: Error})
+    @route.get("/history", response={200: list[CampaignStatOut], 404: Error})
     def get_campaigns_history_handler(self):
-        """캠페인(광고) 별 클릭 수, 조회 수 총 합 집계"""
+        """캠페인(광고) 별 클릭 수, 조회 수 총 합 집계 + PostgreSQL에 집계된 데이터 저장"""
         result = get_aggregate_campaigns_data()
+
+        # PostgreSQL에 집계된 데이터 저장
+        insert_campaign_stats(result)
+
         return 200, result
 
-    @route.post("/{campaign_id}", response={200: Success, 404: Error})
+    @route.post("/{campaign_id}", response={200: Success, 404: Error}, auth=JWTAuth())
     def save_campaign_click_history_handler(self, request, campaign_id: int):
         """캠페인(광고) 클릭 기록 저장 - mongodb에 클릭 기록 저장"""
 
@@ -44,7 +49,9 @@ class CampaignController:
 
         return 200, {"detail": "Clicked"}
 
-    @route.get("/{campaign_id}", response={200: CampaignOut, 404: Error})
+    @route.get(
+        "/{campaign_id}", response={200: CampaignOut, 404: Error}, auth=JWTAuth()
+    )
     def save_campaign_view_history_handler(
         self, request, campaign_id: int, is_true_view: bool | None = None
     ):

@@ -15,3 +15,8 @@ class Campaign(BaseModel):
 
     is_deleted = models.BooleanField(default=False)
     is_visible = models.BooleanField(default=True)
+
+
+class CampaignStat(BaseModel):
+    campaign_id = models.BigIntegerField()
+    count = models.IntegerField()

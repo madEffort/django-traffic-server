@@ -5,9 +5,11 @@ from config.mongodb.collections import (
     campaign_view_collection,
 )
 
+from .models import CampaignStat
+
 
 def get_aggregate_campaigns_data() -> list[dict]:
-
+    """캠페인(광고) 별 조회수, 클릭 수 집계"""
     # view 집계
     view_group = campaign_view_collection.aggregate(
         [
@@ -68,3 +70,15 @@ def get_aggregate_campaigns_data() -> list[dict]:
     ]
 
     return result_list
+
+
+def insert_campaign_stats(result_list) -> None:
+    """집계된 데이터를 PostgreSQL에 저장"""
+    campaign_stats = [
+        CampaignStat(
+            campaign_id=int(item["campaign_id"]),
+            count=int(item["count"]),
+        )
+        for item in result_list
+    ]
+    CampaignStat.objects.bulk_create(campaign_stats)

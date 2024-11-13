@@ -1,7 +1,8 @@
 from datetime import datetime
 from ninja import ModelSchema, Schema
 
-from .models import Campaign
+
+from .models import Campaign, CampaignStat
 
 
 class CampaignSchema(ModelSchema):
@@ -38,3 +39,21 @@ class CampaignOut(Schema):
     end_date: datetime
     is_deleted: bool
     is_visible: bool
+
+
+class CampaignStat(ModelSchema):
+
+    class Meta:
+        model = CampaignStat
+        fields = [
+            "id",
+            "campaign_id",
+            "count",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class CampaignStatOut(Schema):
+    campaign_id: int
+    count: int
