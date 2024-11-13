@@ -1,7 +1,11 @@
-# django-traffic-server
-django-traffic-server
+<h1 align="center">
+  <br>
+  <a href="https://github.com/madEffort/django-traffic-server.git"><img src="https://github.com/user-attachments/assets/5eee5d1d-2070-4898-868f-5f74e0c21155" alt="Django-Traffic-Server" width="400"></a>
+</h1>
 
-개발이 진행 중 입니다...
+
+<h4 align="center">
+개발 중 입니다...</h4>
 
 사용 기술 스택
  - Elasticsearch
