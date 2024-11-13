@@ -13,12 +13,20 @@ from config.mongodb.collections import (
     campaign_view_collection,
 )
 
+from .tasks import get_aggregate_campaigns_data
+
 
 @api_controller("/campaigns", tags=["campaigns"])
 class CampaignController:
 
     def get_campaign_cache_key(self, campaign_id: int) -> str:
         return f"campaign:{campaign_id}"
+
+    @route.get("/history", response={200: list[dict], 404: Error})
+    def get_campaigns_history_handler(self):
+        """캠페인(광고) 별 클릭 수, 조회 수 총 합 집계"""
+        result = get_aggregate_campaigns_data()
+        return 200, result
 
     @route.post("/{campaign_id}", response={200: Success, 404: Error})
     def save_campaign_click_history_handler(self, request, campaign_id: int):
