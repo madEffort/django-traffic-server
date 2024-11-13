@@ -6,6 +6,7 @@ from config.mongodb.collections import (
 )
 
 from .models import CampaignStat
+from .schemas import CampaignStatOut
 
 
 def get_aggregate_campaigns_data() -> list[dict]:
@@ -72,13 +73,13 @@ def get_aggregate_campaigns_data() -> list[dict]:
     return result_list
 
 
-def insert_campaign_stats(result_list) -> None:
+def insert_campaign_stats(result: list[CampaignStatOut]):
     """집계된 데이터를 PostgreSQL에 저장"""
     campaign_stats = [
         CampaignStat(
             campaign_id=int(item["campaign_id"]),
             count=int(item["count"]),
         )
-        for item in result_list
+        for item in result
     ]
     CampaignStat.objects.bulk_create(campaign_stats)

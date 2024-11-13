@@ -25,8 +25,8 @@ class CampaignController:
 
     @route.get("/history", response={200: list[CampaignStatOut], 404: Error})
     def get_campaigns_history_handler(self):
-        """캠페인(광고) 별 클릭 수, 조회 수 총 합 집계 + PostgreSQL에 집계된 데이터 저장"""
-        result = get_aggregate_campaigns_data()
+        """캠페인(광고) 별 클릭 수, 조회 수 총합 집계 + PostgreSQL에 집계된 데이터 저장"""
+        result: list[CampaignStatOut] = get_aggregate_campaigns_data()
 
         # PostgreSQL에 집계된 데이터 저장
         insert_campaign_stats(result)
