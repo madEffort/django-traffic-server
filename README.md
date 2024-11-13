@@ -1,11 +1,11 @@
 <h1 align="center">
   <br>
-  <a href="https://github.com/madEffort/django-traffic-server.git"><img src="https://github.com/user-attachments/assets/5eee5d1d-2070-4898-868f-5f74e0c21155" alt="Django-Traffic-Server" width="400"></a>
+  <a href="https://github.com/madEffort/django-traffic-server.git"><img src="https://github.com/user-attachments/assets/efb147f5-2b94-4dbb-bfbd-74b27257f2e7" alt="django-Traffic-Server-logo-color" width="400"></a>
 </h1>
 
 
 <h4 align="center">
-Django Traffic Server는 대용량 트래픽을 고려한 데이터 수집, 분석 및 모니터링을 위한 시스템으로, 각종 API 기능과 로그 처리 파이프라인을 구현하고 있습니다.</h4>
+django Traffic Server는 대용량 트래픽을 고려한 데이터 수집, 분석 및 모니터링을 위한 시스템으로, 각종 API 기능과 로그 처리 파이프라인을 구현하고 있습니다.</h4>
 
 
 사용 기술 스택
