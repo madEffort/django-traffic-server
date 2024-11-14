@@ -33,7 +33,7 @@ comments 앱
 campaigns 앱
  - 광고 조회 시 조회한 광고의 아이디, 유저의 id, ip주소, 조회한 시간을 MongoDB에 저장
  - 광고 클릭 시 클릭한 광고의 아이디, 유저의 id, ip주소, 클릭한 시간을 MongoDB에 저장
- - 저장된 데이터를 celery를 사용하여 주기적으로 집계하여 PostgreSQL에 저장(진행 중)
+ - 저장된 데이터를 celery(beat)를 사용하여 주기적으로 집계하여 PostgreSQL에 저장
 
 아키텍처
   
