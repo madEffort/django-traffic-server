@@ -11,6 +11,7 @@ django Traffic Server는 대용량 트래픽을 고려한 데이터 수집, 분�
 사용 기술 스택
  - Elasticsearch
  - Kibana
+ - Logstash
  - MongoDB
  - Redis
  - Docker
