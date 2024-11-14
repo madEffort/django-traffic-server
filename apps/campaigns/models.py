@@ -19,4 +19,4 @@ class Campaign(BaseModel):
 
 class CampaignStat(BaseModel):
     campaign_id = models.BigIntegerField()
-    count = models.IntegerField()
+    count = models.PositiveIntegerField(default=0)

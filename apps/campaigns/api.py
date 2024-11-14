@@ -14,7 +14,10 @@ from config.mongodb.collections import (
     campaign_view_collection,
 )
 
-from .tasks import get_aggregate_campaigns_data, insert_campaign_stats
+from .tasks import (
+    aggregate_campaigns_clicks,
+    aggregate_and_insert_campaigns_stats,
+)
 
 
 @api_controller("/campaigns", tags=["campaigns"])
@@ -25,13 +28,13 @@ class CampaignController:
 
     @route.get("/history", response={200: list[CampaignStatOut], 404: Error})
     def get_campaigns_history_handler(self):
-        """캠페인(광고) 별 클릭 수, 조회 수 총합 집계 + PostgreSQL에 집계된 데이터 저장"""
-        result: list[CampaignStatOut] = get_aggregate_campaigns_data()
+        """캠페인(광고) 별 집계 + PostgreSQL에 집계된 데이터(클릭 수) 저장"""
+        click_data: list[CampaignStatOut] = aggregate_campaigns_clicks()
 
-        # PostgreSQL에 집계된 데이터 저장
-        insert_campaign_stats(result)
+        # PostgreSQL에 클릭 집계 저장 - 비동기
+        aggregate_and_insert_campaigns_stats.delay()
 
-        return 200, result
+        return 200, click_data
 
     @route.post("/{campaign_id}", response={200: Success, 404: Error}, auth=JWTAuth())
     def save_campaign_click_history_handler(self, request, campaign_id: int):

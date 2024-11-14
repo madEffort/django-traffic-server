@@ -111,18 +111,29 @@ services:
     volumes:
       - mongo_data:/data/db
 
-  # celery:
-  #   image: my_app_image
-  #   container_name: my_celery_container
-  #   command: celery -A config worker -E -l info
-  #   volumes:
-  #     - .:/app
-  #   env_file:
-  #     - .env
-  #   depends_on:
-  #     - postgres
-  #     - redis
-  #     - app
+  celery:
+    image: my_app_image
+    container_name: my_celery_container
+    command: celery -A config.celery.app worker -E -l info
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - app
+
+  celery_beat:
+    image: my_app_image
+    container_name: my_celery_beat_container
+    command: celery -A config.celery.app beat -l info
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - app
 
 volumes:
   postgres_data:

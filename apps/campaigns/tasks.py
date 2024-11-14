@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta
 
+from celery import shared_task
+
 from config.mongodb.collections import (
     campaign_click_collection,
     campaign_view_collection,
@@ -9,10 +11,9 @@ from .models import CampaignStat
 from .schemas import CampaignStatOut
 
 
-def get_aggregate_campaigns_data() -> list[dict]:
-    """캠페인(광고) 별 조회수, 클릭 수 집계"""
-    # view 집계
-    view_group = campaign_view_collection.aggregate(
+def aggregate_campaigns_views() -> list[CampaignStatOut]:
+    """캠페인(광고) 조회 수 집계"""
+    data = campaign_view_collection.aggregate(
         [
             {
                 "$match": {
@@ -29,12 +30,23 @@ def get_aggregate_campaigns_data() -> list[dict]:
                 }
             },
             {"$group": {"_id": "$_id.campaign_id", "count": {"$sum": 1}}},
+            {
+                "$project": {  # _id를 campaign_id로 변경
+                    "_id": 0,  # _id를 숨김
+                    "campaign_id": "$_id",
+                    "count": 1,
+                }
+            },
         ],
         session=None,
     )
 
-    # click 집계
-    click_group = campaign_click_collection.aggregate(
+    return list(data)
+
+
+def aggregate_campaigns_clicks() -> list[CampaignStatOut]:
+    """캠페인(광고) 클릭 수 집계"""
+    data = campaign_click_collection.aggregate(
         [
             {
                 "$match": {
@@ -51,35 +63,34 @@ def get_aggregate_campaigns_data() -> list[dict]:
                 }
             },
             {"$group": {"_id": "$_id.campaign_id", "count": {"$sum": 1}}},
+            {
+                "$project": {  # _id를 campaign_id로 변경
+                    "_id": 0,  # _id를 숨김
+                    "campaign_id": "$_id",
+                    "count": 1,
+                }
+            },
         ],
         session=None,
     )
 
-    # view_group과 click_group 결과를 딕셔너리로 변환
-    view_counts = {item["_id"]: item["count"] for item in view_group}
-    click_counts = {item["_id"]: item["count"] for item in click_group}
-
-    # 두 딕셔너리를 합산하여 병합
-    total_counts = view_counts.copy()
-    for campaign_id, count in click_counts.items():
-        total_counts[campaign_id] = total_counts.get(campaign_id, 0) + count
-
-    # 최종 결과 형식으로 변환
-    result_list = [
-        {"campaign_id": campaign_id, "count": count}
-        for campaign_id, count in total_counts.items()
-    ]
-
-    return result_list
+    return list(data)
 
 
-def insert_campaign_stats(result: list[CampaignStatOut]):
+def insert_campaigns_stats(data: list[CampaignStat]):
     """집계된 데이터를 PostgreSQL에 저장"""
     campaign_stats = [
         CampaignStat(
             campaign_id=int(item["campaign_id"]),
             count=int(item["count"]),
         )
-        for item in result
+        for item in data
     ]
     CampaignStat.objects.bulk_create(campaign_stats)
+
+
+@shared_task
+def aggregate_and_insert_campaigns_stats():
+    """캠페인(광고) 클릭 데이터 집계 및 저장 작업"""
+    data: list[CampaignStat] = aggregate_campaigns_clicks()
+    insert_campaigns_stats(data)

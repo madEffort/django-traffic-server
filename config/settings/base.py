@@ -231,3 +231,7 @@ CACHES = {
         },
     }
 }
+
+# celery
+
+from ..celery.settings import *  # noqa
