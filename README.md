@@ -13,7 +13,9 @@ django Traffic Server는 대용량 트래픽을 고려한 데이터 수집, 분�
  - Kibana
  - Logstash
  - MongoDB
+ - PostgreSQL
  - Redis
+ - Celery
  - Docker
  - ...
 
