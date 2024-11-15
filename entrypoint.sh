@@ -1,7 +1,7 @@
 #! /bin/sh
 
 export DJANGO_SETTINGS_MODULE=config.settings.development
-python delete_migrations.py
+# python delete_migrations.py
 python manage.py makemigrations
 python manage.py migrate
 python manage.py collectstatic --noinput
