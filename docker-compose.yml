@@ -89,6 +89,24 @@ services:
     depends_on:
       - elasticsearch
 
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.5.1
+    container_name: my_logstash_container
+    volumes:
+      - ./logstash/config:/usr/share/logstash/config
+      - ./logstash/pipeline:/usr/share/logstash/pipeline
+    ports:
+      - "5044:5044" # Logstash Beats input
+      - "9600:9600" # Prometheus Exporter 포트
+    env_file:
+      - .env
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+    depends_on:
+      - elasticsearch
+    # command: >
+    # bash -c "bin/logstash-plugin install logstash-output-prometheus && logstash -f /usr/share/logstash/pipeline/logstash.conf"
+
   redis:
     image: redis:7
     container_name: my_redis_container

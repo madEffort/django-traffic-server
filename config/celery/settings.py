@@ -5,10 +5,26 @@ CELERY_BROKER_URL = f'redis://:{config("REDIS_PASSWORD")}@redis:6379/0'
 
 
 CELERY_BEAT_SCHEDULE = {
-    "aggregate_and_insert_campaigns_stats": {
-        "task": "apps.campaigns.tasks.aggregate_and_insert_campaigns_stats",
+    "aggregate_and_insert_campaigns_clicks": {
+        "task": "apps.campaigns.tasks.aggregate_and_insert_campaigns_clicks",
+        # 매 분마다 작업
         "schedule": crontab(
-            minute=0, hour=0, day_of_week="*", day_of_month="*", month_of_year="*"
+            minute="*",
+            hour="*",
+            day_of_week="*",
+            day_of_month="*",
+            month_of_year="*",
+        ),
+    },
+    "aggregate_and_insert_campaigns_views": {
+        "task": "apps.campaigns.tasks.aggregate_and_insert_campaigns_views",
+        # 매 분마다 작업
+        "schedule": crontab(
+            minute="*",
+            hour="*",
+            day_of_week="*",
+            day_of_month="*",
+            month_of_year="*",
         ),
     },
 }

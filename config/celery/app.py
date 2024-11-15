@@ -10,3 +10,4 @@ celery_app.autodiscover_tasks()
 
 # 명령어
 # celery -A config.celery.app worker -E -l info
+# celery -A config.celery.app beat -l info

@@ -17,6 +17,17 @@ class Campaign(BaseModel):
     is_visible = models.BooleanField(default=True)
 
 
-class CampaignStat(BaseModel):
+class CampaignStatBase(BaseModel):
     campaign_id = models.BigIntegerField()
     count = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        abstract = True
+
+
+class CampaignViewStat(CampaignStatBase):
+    pass
+
+
+class CampaignClickStat(CampaignStatBase):
+    pass

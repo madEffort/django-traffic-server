@@ -7,11 +7,11 @@ from config.mongodb.collections import (
     campaign_view_collection,
 )
 
-from .models import CampaignStat
+from .models import CampaignClickStat, CampaignViewStat
 from .schemas import CampaignStatOut
 
 
-def aggregate_campaigns_views() -> list[CampaignStatOut]:
+def aggregate_campaign_views() -> list[CampaignStatOut]:
     """캠페인(광고) 조회 수 집계"""
     data = campaign_view_collection.aggregate(
         [
@@ -44,7 +44,7 @@ def aggregate_campaigns_views() -> list[CampaignStatOut]:
     return list(data)
 
 
-def aggregate_campaigns_clicks() -> list[CampaignStatOut]:
+def aggregate_campaign_clicks() -> list[CampaignStatOut]:
     """캠페인(광고) 클릭 수 집계"""
     data = campaign_click_collection.aggregate(
         [
@@ -77,20 +77,27 @@ def aggregate_campaigns_clicks() -> list[CampaignStatOut]:
     return list(data)
 
 
-def insert_campaigns_stats(data: list[CampaignStat]):
+def insert_campaigns_stats(data: list[CampaignStatOut], model_class):
     """집계된 데이터를 PostgreSQL에 저장"""
     campaign_stats = [
-        CampaignStat(
+        model_class(
             campaign_id=int(item["campaign_id"]),
             count=int(item["count"]),
         )
         for item in data
     ]
-    CampaignStat.objects.bulk_create(campaign_stats)
+    model_class.objects.bulk_create(campaign_stats)
 
 
 @shared_task
-def aggregate_and_insert_campaigns_stats():
+def aggregate_and_insert_campaigns_views():
+    """캠페인(광고) 조회 데이터 집계 및 저장 작업"""
+    views_data: list[CampaignStatOut] = aggregate_campaign_views()
+    insert_campaigns_stats(views_data, CampaignViewStat)
+
+
+@shared_task
+def aggregate_and_insert_campaigns_clicks():
     """캠페인(광고) 클릭 데이터 집계 및 저장 작업"""
-    data: list[CampaignStat] = aggregate_campaigns_clicks()
-    insert_campaigns_stats(data)
+    clicks_data: list[CampaignStatOut] = aggregate_campaign_clicks()
+    insert_campaigns_stats(clicks_data, CampaignClickStat)

@@ -2,7 +2,7 @@ from datetime import datetime
 from ninja import ModelSchema, Schema
 
 
-from .models import Campaign, CampaignStat
+from .models import Campaign, CampaignViewStat, CampaignClickStat
 
 
 class CampaignSchema(ModelSchema):
@@ -41,10 +41,23 @@ class CampaignOut(Schema):
     is_visible: bool
 
 
-class CampaignStat(ModelSchema):
+class CampaignViewStat(ModelSchema):
 
     class Meta:
-        model = CampaignStat
+        model = CampaignViewStat
+        fields = [
+            "id",
+            "campaign_id",
+            "count",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class CampaignClickStat(ModelSchema):
+
+    class Meta:
+        model = CampaignClickStat
         fields = [
             "id",
             "campaign_id",

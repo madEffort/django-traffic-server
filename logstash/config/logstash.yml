@@ -1,0 +1,6 @@
+# logstash/config/logstash.yml
+path.data: /usr/share/logstash/data
+path.logs: /usr/share/logstash/logs
+http.host: "0.0.0.0"
+http.port: 9600
+log.level: info
