@@ -66,6 +66,7 @@ CUSTOM_APPS = [
     "apps.comments",
     "apps.campaigns",
     "apps.users",
+    "apps.devices",
     "apps",
 ]
 

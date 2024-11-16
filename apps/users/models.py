@@ -6,7 +6,7 @@ from django.contrib.postgres.fields import ArrayField
 class User(AbstractUser):
 
     username = models.EmailField(unique=True)
-    device = ArrayField(
+    devices = ArrayField(
         models.CharField(max_length=255),
         blank=True,
         default=list,
