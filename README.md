@@ -27,7 +27,6 @@ users 앱
 
 boards 앱
  - 게시물 api에 transaction.atomic을 사용하여 낙관적 동시성 제어를 적용
- - 게시물에 캐싱을 적용하여 게시물 조회 시 성능 최적화
  - 게시물을 title과 content 필드를 기준으로 elasticsearch를 적용하여 검색 가능
 
 comments 앱
@@ -37,6 +36,7 @@ comments 앱
 campaigns 앱
  - 광고 조회 시 조회한 광고의 아이디, 유저의 id, ip주소, 조회한 시간을 MongoDB에 저장
  - 광고 클릭 시 클릭한 광고의 아이디, 유저의 id, ip주소, 클릭한 시간을 MongoDB에 저장
+ - 광고에 캐싱을 적용하여 조회 시 성능 최적화
  - 저장된 데이터를 celery(beat)를 사용하여 주기적으로 집계하여 PostgreSQL에 저장
 
 아키텍처
