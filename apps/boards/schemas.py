@@ -59,3 +59,9 @@ class PostOut(Schema):
     is_deleted: bool
     created_at: datetime
     updated_at: datetime
+
+
+class PostNotification(Schema):
+    type: str
+    user_id: int
+    post_id: int

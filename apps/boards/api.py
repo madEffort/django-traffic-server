@@ -10,12 +10,23 @@ from elasticsearch_dsl.query import MultiMatch
 from apps.common.schemas import Error
 
 from .models import Board, Post
-from .schemas import BoardIn, BoardOut, PostIn, PostOut, PostUpdate
+from .schemas import BoardIn, BoardOut, PostIn, PostOut, PostUpdate, PostNotification
 from .documents import PostDocument
+from .tasks import send_notification
 
 
 @api_controller("/boards", tags=["boards"])
 class BoardController:
+
+    def get_post_notification(self, post: Post):
+        """게시글 생성 알림 생성 함수"""
+        post_notification = PostNotification(
+            type="create_post",
+            user_id=post.author.id,
+            post_id=post.id,
+        )
+
+        return post_notification
 
     def get_board_and_post(self, board_id: int, post_id: int):
         """게시판, 게시물 검증"""
@@ -98,6 +109,10 @@ class BoardController:
         post: Post = Post.objects.create(
             title=data.title, content=data.content, author=request.user, board=board
         )
+
+        # 게시글 생성 시 게시글 작성자에게 알림
+        post_notification: PostNotification = self.get_post_notification(post)
+        send_notification.delay(post_notification.dict())
 
         return 201, post
 
