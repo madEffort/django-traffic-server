@@ -36,3 +36,7 @@ CELERY_BEAT_SCHEDULE = {
         ),
     },
 }
+
+CELERY_TASK_ROUTES = {
+    "apps.boards.tasks.send_notification": {"queue": "send_notification_queue"},
+}

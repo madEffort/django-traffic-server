@@ -132,7 +132,7 @@ services:
   celery:
     image: my_app_image
     container_name: my_celery_container
-    command: celery -A config.celery.app worker -E -l info
+    command: celery -A config.celery.app worker -E -l info --queues=celery,send_notification_queue
     volumes:
       - .:/app
     env_file:
