@@ -28,6 +28,7 @@ users 앱
 boards 앱
  - 게시물 api에 transaction.atomic을 사용하여 낙관적 동시성 제어를 적용
  - 게시물을 title과 content 필드를 기준으로 elasticsearch를 적용하여 검색 가능
+ - 게시물 작성 시 게시물 작성자에게 알람이 가도록 구현
 
 comments 앱
 - 재귀방식을 이용하여 1depth의 대댓글 기능 구현
