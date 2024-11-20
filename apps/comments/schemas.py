@@ -32,3 +32,9 @@ class CommentOut(Schema):
     content: str
     author: UserOut
     is_deleted: bool
+
+
+class CommentNotification(Schema):
+    type: str
+    user_id: int
+    comment_id: int

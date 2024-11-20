@@ -11,7 +11,8 @@ from ninja_extra.pagination import (
     PaginatedResponseSchema,
 )
 
-from apps.comments.schemas import CommentIn, CommentOut
+from apps.boards.tasks import send_notification
+from apps.comments.schemas import CommentIn, CommentNotification, CommentOut
 from apps.common.schemas import Error
 from apps.boards.models import Board, Post
 
@@ -161,5 +162,14 @@ class CommentController:
         comment = Comment.objects.create(
             author=request.user, post=post, content=data.content, parent=parent_comment
         )
+
+        # 댓글 작성 메시지 큐 추가
+        comment_notification = CommentNotification(
+            type="create_comment",
+            user_id=request.user.id,
+            comment_id=comment.id,
+        )
+
+        send_notification.delay(comment_notification.dict())
 
         return 201, comment
