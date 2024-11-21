@@ -165,6 +165,15 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
+  locust:
+    image: locustio/locust
+    container_name: my_locust_container
+    command: -f /mnt/locust/locustfile.py -H http://app:8000
+    volumes:
+      - .:/mnt/locust
+    ports:
+      - "8089:8089"
+
 volumes:
   postgres_data:
   grafana_data:
