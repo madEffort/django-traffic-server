@@ -10,8 +10,10 @@ from .schemas import CampaignIn, CampaignOut, CampaignStatOut
 
 from .mongo_models import CampaignViewHistory, CampaignClickHistory
 from config.mongodb.collections import (
-    campaign_click_collection,
-    campaign_view_collection,
+    # campaign_click_collection,
+    # campaign_view_collection,
+    CampaignClickCollection,
+    CampaignViewCollection,
 )
 
 from .tasks import (
@@ -42,7 +44,7 @@ class CampaignController:
 
         client_ip = request.META.get("REMOTE_ADDR")
 
-        campaign_click_collection.insert_one(
+        CampaignClickCollection().insert_one(
             CampaignClickHistory(
                 campaign_id=campaign_id,
                 user_id=request.user.id,
@@ -61,7 +63,7 @@ class CampaignController:
         """캠페인(광고) 조회 기록 저장 - mongodb에 조회 기록 저장"""
         client_ip = request.META.get("REMOTE_ADDR")
 
-        campaign_view_collection.insert_one(
+        CampaignViewCollection().insert_one(
             CampaignViewHistory(
                 campaign_id=campaign_id,
                 user_id=request.user.id,

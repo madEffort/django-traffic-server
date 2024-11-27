@@ -3,8 +3,10 @@ from datetime import datetime, timedelta
 from celery import shared_task
 
 from config.mongodb.collections import (
-    campaign_click_collection,
-    campaign_view_collection,
+    # campaign_click_collection,
+    # campaign_view_collection,
+    CampaignClickCollection,
+    CampaignViewCollection,
 )
 
 from .models import CampaignClickStat, CampaignViewStat
@@ -13,7 +15,8 @@ from .schemas import CampaignStatOut
 
 def aggregate_campaign_views() -> list[CampaignStatOut]:
     """캠페인(광고) 조회 수 집계"""
-    data = campaign_view_collection.aggregate(
+
+    data = CampaignViewCollection().aggregate(
         [
             {
                 "$match": {
@@ -46,7 +49,7 @@ def aggregate_campaign_views() -> list[CampaignStatOut]:
 
 def aggregate_campaign_clicks() -> list[CampaignStatOut]:
     """캠페인(광고) 클릭 수 집계"""
-    data = campaign_click_collection.aggregate(
+    data = CampaignClickCollection().aggregate(
         [
             {
                 "$match": {
